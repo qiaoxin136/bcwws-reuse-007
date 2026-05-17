@@ -6,7 +6,6 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 import { generateClient } from "aws-amplify/data";
 import "@aws-amplify/ui-react/styles.css";
 import { uploadData, remove } from "aws-amplify/storage";
-import { StorageImage } from '@aws-amplify/ui-react-storage';
 
 import type { MapMouseEvent } from "mapbox-gl";
 

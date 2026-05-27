@@ -12,12 +12,15 @@ Amplify.configure(outputs);
 const components = {
   Header() {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0 32px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 0 32px' }}>
         <img
           src="/logo.png"
           alt="Thompson & Associates"
-          style={{ maxWidth: '480px', width: '100%' }}
+          style={{ maxWidth: '240px', width: '100%' }}
         />
+        <p style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '13px', marginTop: '12px', color: '#333', maxWidth: '360px' }}>
+          BCWWS REGIONAL EFFLUENT AND REUSE SOLUTIONS - EFFLUENT WATER TRANSMISSION MAIN
+        </p>
       </div>
     );
   },

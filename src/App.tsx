@@ -747,6 +747,7 @@ function App() {
 
     // Pre-Pass: clear all existing Valve records
     setComputeStatus("Pre-Pass: Clearing Valve table...");
+    await new Promise(r => setTimeout(r, 0));
     const { data: allValves } = await client.models.Valve.list();
     for (const v of allValves ?? []) {
       await client.models.Valve.delete({ id: v.id });
@@ -754,6 +755,7 @@ function App() {
 
     // Pass 0: populate unitprice and geometry from trackData.ts by matching Location type → TRACK_DATA
     setComputeStatus("Pass 0: Populating unit price, geometry, unit from trackData...");
+    await new Promise(r => setTimeout(r, 0));
     for (const trackRec of sorted) {
       const pts = location.filter(l => l.track === trackRec.track);
       const firstType = pts.find(p => p.type)?.type;
@@ -776,6 +778,7 @@ function App() {
 
     // Pass 1: compute quantity (and ft2/yd2 for polygons) using fresh geometry
     setComputeStatus("Pass 1: Computing quantity, area, last date...");
+    await new Promise(r => setTimeout(r, 0));
     for (const trackRec of freshSorted) {
       const pts = location.filter(l => l.track === trackRec.track);
 
@@ -825,6 +828,7 @@ function App() {
 
     // Pass 2: compute value = unitprice * quantity
     setComputeStatus("Pass 2: Computing Track value = unit price × quantity...");
+    await new Promise(r => setTimeout(r, 0));
     for (const trackRec of freshSorted) {
       const { data: fresh } = await client.models.Track.get({ id: trackRec.id });
       if (fresh && fresh.unitprice != null && fresh.quan != null) {
@@ -835,6 +839,7 @@ function App() {
 
     // Pass 3: count Location records where joint <> "joint", grouped by joint value → save to Valve table (last step)
     setComputeStatus("Pass 3: Counting joints, updating Valve table...");
+    await new Promise(r => setTimeout(r, 0));
     const nonJoint = location.filter(l => l.joint !== 'joint' && l.joint != null && l.joint !== '');
     const typeCounts: Record<string, number> = {};
     for (const loc of nonJoint) {
@@ -853,6 +858,7 @@ function App() {
 
     // Pass 3.5: populate unitprice and ton in Valve table from VALVE_PRICE_DATA
     setComputeStatus("Pass 3.5: Populating Valve unit price and ton from lookup table...");
+    await new Promise(r => setTimeout(r, 0));
     const { data: valvesForPrice } = await client.models.Valve.list();
     for (const v of valvesForPrice ?? []) {
       const match = VALVE_PRICE_DATA.find(r => r.valve === v.valve);
@@ -863,6 +869,7 @@ function App() {
 
     // Pass 4: compute Valve value = number * unitprice * ton
     setComputeStatus("Pass 4: Computing Valve value = number × unit price × ton...");
+    await new Promise(r => setTimeout(r, 0));
     const { data: freshValves } = await client.models.Valve.list();
     for (const v of freshValves ?? []) {
       if (v.number != null && v.unitprice != null && v.ton != null) {
@@ -1859,61 +1866,18 @@ function App() {
                         <TableCell as="th">Unit Price</TableCell>
                         <TableCell as="th">Ton</TableCell>
                         <TableCell as="th">Value</TableCell>
-                        <TableCell as="th"></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {[...valveList].sort((a, b) => (a.valve ?? '').localeCompare(b.valve ?? '')).map(item => {
-                        const isEditing = editingValveId === item.id;
-                        return isEditing ? (
-                          <TableRow key={item.id}>
-                            <TableCell>
-                              <input type="text" value={editValveFields.valve}
-                                onChange={e => setEditValveFields(p => ({ ...p, valve: e.target.value }))} style={{ width: '100%' }} />
-                            </TableCell>
-                            <TableCell>
-                              <input type="number" value={editValveFields.number}
-                                onChange={e => setEditValveFields(p => ({ ...p, number: e.target.value === "" ? "" : Number(e.target.value) }))} style={{ width: '100%' }} />
-                            </TableCell>
-                            <TableCell>
-                              <input type="number" value={editValveFields.unitprice}
-                                onChange={e => setEditValveFields(p => ({ ...p, unitprice: e.target.value === "" ? "" : Number(e.target.value) }))} style={{ width: '100%' }} />
-                            </TableCell>
-                            <TableCell>
-                              <input type="number" value={editValveFields.ton}
-                                onChange={e => setEditValveFields(p => ({ ...p, ton: e.target.value === "" ? "" : Number(e.target.value) }))} style={{ width: '100%' }} />
-                            </TableCell>
-                            <TableCell>
-                              <input type="number" value={editValveFields.value}
-                                onChange={e => setEditValveFields(p => ({ ...p, value: e.target.value === "" ? "" : Number(e.target.value) }))} style={{ width: '100%' }} />
-                            </TableCell>
-                            <TableCell>
-                              <button onClick={() => saveValveInfo(item.id)} style={{ marginRight: 4, backgroundColor: 'green', color: 'white', border: 'none', padding: '4px 10px', cursor: 'pointer' }}>Save</button>
-                              <button onClick={() => setEditingValveId(null)} style={{ backgroundColor: 'red', color: 'white', border: 'none', padding: '4px 10px', cursor: 'pointer' }}>Cancel</button>
-                            </TableCell>
-                          </TableRow>
-                        ) : (
+                      {[...valveList].sort((a, b) => (a.valve ?? '').localeCompare(b.valve ?? '')).map(item => (
                           <TableRow key={item.id}>
                             <TableCell>{item.valve ?? ''}</TableCell>
                             <TableCell>{item.number ?? ''}</TableCell>
                             <TableCell>{item.unitprice ?? ''}</TableCell>
                             <TableCell>{item.ton ?? ''}</TableCell>
                             <TableCell>{item.value ?? ''}</TableCell>
-                            <TableCell>
-                              <button onClick={() => {
-                                setEditingValveId(item.id);
-                                setEditValveFields({
-                                  valve: item.valve ?? "",
-                                  number: item.number ?? "",
-                                  unitprice: item.unitprice ?? "",
-                                  ton: item.ton ?? "",
-                                  value: item.value ?? "",
-                                });
-                              }} style={{ backgroundColor: 'orange', color: 'white', border: 'none', padding: '4px 10px', cursor: 'pointer' }}>Modify</button>
-                            </TableCell>
                           </TableRow>
-                        );
-                      })}
+                        ))}
                     </TableBody>
                   </Table>
                 </ThemeProvider>

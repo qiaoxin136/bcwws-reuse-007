@@ -44,6 +44,8 @@ const schema = a.schema({
       numpoint: a.integer(),
       trip: a.boolean(),
       cost: a.boolean(),
+      unit: a.string(),
+      lastdate: a.string(),
       locations: a.hasMany('Location', 'trackId'),
     })
     .authorization((allow) => [allow.publicApiKey()]),

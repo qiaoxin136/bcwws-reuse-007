@@ -727,20 +727,28 @@ function App() {
     const LAT_FT = 364000;
     const sorted = [...trackInfoList].sort((a, b) => (a.track ?? 0) - (b.track ?? 0));
 
-    // Pass 0: populate unitprice from trackData.ts by matching Location type → TRACK_DATA
+    // Pass 0: populate unitprice and geometry from trackData.ts by matching Location type → TRACK_DATA
     for (const trackRec of sorted) {
       const pts = location.filter(l => l.track === trackRec.track);
       const firstType = pts.find(p => p.type)?.type;
       if (firstType) {
         const match = TRACK_DATA.find(r => r.type === firstType);
-        if (match?.unitprice != null) {
-          await client.models.Track.update({ id: trackRec.id, unitprice: match.unitprice });
+        if (match) {
+          await client.models.Track.update({
+            id: trackRec.id,
+            ...(match.unitprice != null && { unitprice: match.unitprice }),
+            ...(match.geometry   != null && { geometry:  match.geometry  }),
+          });
         }
       }
     }
 
-    // Pass 1: compute quantity (and ft2/yd2 for polygons)
-    for (const trackRec of sorted) {
+    // Re-fetch fresh track data after Pass 0 so geometry/unitprice updates are reflected
+    const { data: freshTracks } = await client.models.Track.list();
+    const freshSorted = [...(freshTracks ?? [])].sort((a, b) => (a.track ?? 0) - (b.track ?? 0));
+
+    // Pass 1: compute quantity (and ft2/yd2 for polygons) using fresh geometry
+    for (const trackRec of freshSorted) {
       const pts = location.filter(l => l.track === trackRec.track);
 
       if (trackRec.geometry === 'line') {
@@ -752,18 +760,24 @@ function App() {
         await client.models.Track.update({ id: trackRec.id, quan: n, numpoint: n });
 
       } else if (trackRec.geometry === 'polygon') {
-        const n = pts.length;
+        // Sort by date+time so points are in field-collection order (required for Shoelace)
+        const orderedPts = [...pts].sort((a, b) => {
+          const da = `${a.date ?? ''}T${a.time ?? ''}`;
+          const db = `${b.date ?? ''}T${b.time ?? ''}`;
+          return da.localeCompare(db);
+        });
+        const n = orderedPts.length;
         if (n < 3) {
           await client.models.Track.update({ id: trackRec.id, numpoint: n, ft2: 0, yd2: 0, quan: 0 });
           continue;
         }
-        const midLat = pts.reduce((s, p) => s + (p.lat ?? 0), 0) / n;
+        const midLat = orderedPts.reduce((s, p) => s + (p.lat ?? 0), 0) / n;
         const LNG_FT = LAT_FT * Math.cos((midLat * Math.PI) / 180);
         let area = 0;
         for (let i = 0; i < n; i++) {
           const j = (i + 1) % n;
-          area += (pts[i].lng ?? 0) * LNG_FT * (pts[j].lat ?? 0) * LAT_FT
-                - (pts[j].lng ?? 0) * LNG_FT * (pts[i].lat ?? 0) * LAT_FT;
+          area += (orderedPts[i].lng ?? 0) * LNG_FT * (orderedPts[j].lat ?? 0) * LAT_FT
+                - (orderedPts[j].lng ?? 0) * LNG_FT * (orderedPts[i].lat ?? 0) * LAT_FT;
         }
         const sqFt = Math.round(Math.abs(area) / 2 * 100) / 100;
         const sqYd = Math.round(sqFt / 9 * 100) / 100;
@@ -772,7 +786,7 @@ function App() {
     }
 
     // Pass 2: compute value = unitprice * quantity
-    for (const trackRec of sorted) {
+    for (const trackRec of freshSorted) {
       const { data: fresh } = await client.models.Track.get({ id: trackRec.id });
       if (fresh && fresh.unitprice != null && fresh.quan != null) {
         const value = Math.round(fresh.unitprice * fresh.quan * 100) / 100;

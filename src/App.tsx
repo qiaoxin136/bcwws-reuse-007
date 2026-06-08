@@ -92,7 +92,7 @@ const trackInfoSelectionSet = [
 ] as const;
 type TrackInfoItem = SelectionSet<Schema['Track']['type'], typeof trackInfoSelectionSet>;
 
-const valveSelectionSet = ['id', 'valve', 'number', 'createdAt', 'updatedAt'] as const;
+const valveSelectionSet = ['id', 'valve', 'number', 'unitprice', 'value', 'createdAt', 'updatedAt'] as const;
 type ValveItem = SelectionSet<Schema['Valve']['type'], typeof valveSelectionSet>;
 
 
@@ -1640,6 +1640,7 @@ function App() {
                         <TableCell as="th">yd²</TableCell>
                         <TableCell as="th">Unit Price</TableCell>
                         <TableCell as="th">Unit</TableCell>
+                        <TableCell as="th">Last Date</TableCell>
                         <TableCell as="th">Quantity</TableCell>
                         <TableCell as="th">Value</TableCell>
                         <TableCell as="th">Num Points</TableCell>
@@ -1754,6 +1755,7 @@ function App() {
                             <TableCell>{item.yd2 ?? ''}</TableCell>
                             <TableCell>{item.unitprice ?? ''}</TableCell>
                             <TableCell>{item.unit ?? ''}</TableCell>
+                            <TableCell>{item.lastdate ?? ''}</TableCell>
                             <TableCell>{item.quan ?? ''}</TableCell>
                             <TableCell>{item.value ?? ''}</TableCell>
                             <TableCell>{item.numpoint ?? ''}</TableCell>
@@ -1806,6 +1808,8 @@ function App() {
                       <TableRow>
                         <TableCell as="th">Valve</TableCell>
                         <TableCell as="th">Number</TableCell>
+                        <TableCell as="th">Unit Price</TableCell>
+                        <TableCell as="th">Value</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1813,6 +1817,8 @@ function App() {
                         <TableRow key={item.id}>
                           <TableCell>{item.valve ?? ''}</TableCell>
                           <TableCell>{item.number ?? ''}</TableCell>
+                          <TableCell>{item.unitprice ?? ''}</TableCell>
+                          <TableCell>{item.value ?? ''}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

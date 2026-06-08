@@ -15,7 +15,8 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); api=d.get\\('data',{}\\); print\\(list\\(api.keys\\(\\)\\)[:10]\\)\")",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); models=d['data']['model_introspection']['models']; print\\(list\\(models.keys\\(\\)\\)\\)\")",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); fields=d['data']['model_introspection']['models']['Date']['fields']; print\\(json.dumps\\({k: v.get\\('type'\\) for k,v in fields.items\\(\\)}, indent=2\\)\\)\")",
-      "Bash(curl -s http://localhost:5174)"
+      "Bash(curl -s http://localhost:5174)",
+      "Bash(grep -v \"unitprice\\\\|unitSel\\\\|unittest\\\\|//\\\\|selectionSet\\\\|createdAt\")"
     ]
   }
 }

@@ -55,6 +55,7 @@ const schema = a.schema({
       number: a.integer(),
       unitprice: a.float(),
       value: a.float(),
+      ton: a.float(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
   Date: a

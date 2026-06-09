@@ -1004,6 +1004,9 @@ function App() {
         <Button onClick={signOut} width={120}>
           Sign out
         </Button>
+        <Button onClick={() => setShowAdminTabs(v => !v)} backgroundColor={showAdminTabs ? "#555" : "#888"} color={"white"}>
+          {showAdminTabs ? "▲ Tab" : "▼ Tab"}
+        </Button>
         <Button onClick={createLocation} backgroundColor={"azure"} color={"red"}>
           + New
         </Button>
@@ -1012,9 +1015,6 @@ function App() {
         </Button>
         <Button onClick={handleCompute} backgroundColor={"lightgreen"} color={"darkgreen"}>
           Compute
-        </Button>
-        <Button onClick={() => setShowAdminTabs(v => !v)} backgroundColor={showAdminTabs ? "#555" : "#888"} color={"white"}>
-          {showAdminTabs ? "▲ Tab" : "▼ Tab"}
         </Button>
         <Button onClick={handleExportPolygon} backgroundColor={"steelblue"} color={"white"}>
           Complete Polygon
